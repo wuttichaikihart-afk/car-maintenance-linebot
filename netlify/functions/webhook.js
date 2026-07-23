@@ -198,14 +198,63 @@ async function handleEvent(event) {
       });
     }
 
-    // Default reply if it's not a number
-    return client.replyMessage({
-      replyToken: event.replyToken,
-      messages: [{
-        type: 'text',
-        text: 'หากต้องการอัปเดตเลขไมล์ กรุณาพิมพ์เฉพาะตัวเลขครับ เช่น 50000'
-      }]
-    });
+    // If the message is not a number, let AI handle it as a question!
+    try {
+      let user = await db.user.findUnique({
+        where: { lineId: userId },
+        include: { cars: true }
+      });
+      const car = user && user.cars.length > 0 ? user.cars[0] : null;
+
+      if (process.env.GEMINI_API_KEY) {
+        const { GoogleGenAI } = require('@google/genai');
+        const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+        
+        let context = "";
+        if (car && car.brand && car.model) {
+            context = `ข้อมูลผู้ใช้: ขับรถ ${car.brand} ${car.model} เลขไมล์ปัจจุบัน ${car.currentMileage} กม.`;
+        }
+
+        const prompt = `ทำหน้าที่เป็นช่างซ่อมรถยนต์ผู้เชี่ยวชาญและใจดี ตอบคำถามลูกค้า
+${context}
+คำถามจากลูกค้า: "${text}"
+
+ข้อกำหนด: 
+- ตอบสั้นๆ กระชับ เป็นกันเอง (เหมาะสำหรับแอปแชท LINE)
+- ถ้าลูกค้าถามเรื่องการบำรุงรักษา ให้ตอบตามมาตรฐานรถของเขา
+- ถ้าลูกค้าคุยเล่น ก็คุยเล่นตอบได้เลยในฐานะช่าง`;
+
+        const response = await ai.models.generateContent({
+          model: 'gemini-2.5-flash',
+          contents: prompt,
+        });
+
+        return client.replyMessage({
+          replyToken: event.replyToken,
+          messages: [{
+            type: 'text',
+            text: response.text
+          }]
+        });
+      } else {
+        return client.replyMessage({
+          replyToken: event.replyToken,
+          messages: [{
+            type: 'text',
+            text: 'หากต้องการอัปเดตเลขไมล์ กรุณาพิมพ์เฉพาะตัวเลขครับ เช่น 50000\n(หรือหากต้องการคุยกับ AI ช่างยนต์ โปรดตั้งค่า GEMINI_API_KEY ก่อนครับ)'
+          }]
+        });
+      }
+    } catch (e) {
+      console.error('Failed to get Gemini response for chat:', e);
+      return client.replyMessage({
+        replyToken: event.replyToken,
+        messages: [{
+          type: 'text',
+          text: 'หากต้องการอัปเดตเลขไมล์ กรุณาพิมพ์เฉพาะตัวเลขครับ เช่น 50000'
+        }]
+      });
+    }
   }
 
   // Return a resolved promise for unhandled events
