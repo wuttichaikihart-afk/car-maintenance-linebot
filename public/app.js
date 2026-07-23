@@ -129,11 +129,18 @@ document.getElementById('registration-form').addEventListener('submit', async (e
             throw new Error('Network response was not ok');
         }
 
-        // Success - Close LIFF window
-        if (liff.isInClient()) {
-            liff.closeWindow();
+        const result = await response.json();
+        
+        if (result.success) {
+            // Success - Close LIFF window
+            if (liff.isInClient()) {
+                liff.closeWindow();
+            } else {
+                alert('ลงทะเบียนสำเร็จ! คุณสามารถปิดหน้านี้และกลับไปที่แอป LINE ได้เลยครับ');
+            }
         } else {
-            alert('ลงทะเบียนสำเร็จ! คุณสามารถปิดหน้านี้และกลับไปที่แอป LINE ได้เลยครับ');
+            // Backend returned 200 OK but success is false
+            alert('เกิดข้อผิดพลาด: ' + (result.error || 'ไม่ทราบสาเหตุ'));
         }
 
     } catch (error) {
