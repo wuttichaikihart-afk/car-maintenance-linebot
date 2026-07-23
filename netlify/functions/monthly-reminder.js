@@ -1,5 +1,5 @@
 const { schedule } = require('@netlify/functions');
-const line = require('@line/bot-sdk');
+const { messagingApi } = require('@line/bot-sdk');
 const db = require('../../src/services/db');
 
 const config = {
@@ -7,7 +7,9 @@ const config = {
   channelSecret: process.env.LINE_CHANNEL_SECRET,
 };
 
-const client = new line.Client(config);
+const client = new messagingApi.MessagingApiClient({
+  channelAccessToken: config.channelAccessToken
+});
 
 // Run on the 1st of every month at 9:00 AM (UTC+7 usually means we set UTC time, but Netlify uses UTC by default, so 02:00 UTC = 09:00 BKK)
 // Cron syntax: minute hour day month day-of-week
@@ -25,7 +27,10 @@ module.exports.handler = schedule('0 2 1 * *', async (event) => {
     // Note: In production with many users, it's better to use multicast to send in batches of 500
     for (const user of users) {
       if (user.lineId) {
-        await client.pushMessage(user.lineId, message);
+        await client.pushMessage({
+          to: user.lineId,
+          messages: [message]
+        });
       }
     }
 

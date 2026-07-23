@@ -1,4 +1,4 @@
-const line = require('@line/bot-sdk');
+const { messagingApi } = require('@line/bot-sdk');
 const crypto = require('crypto');
 const db = require('../../src/services/db');
 const { checkMaintenanceRules } = require('../../src/services/maintenance');
@@ -8,7 +8,9 @@ const config = {
   channelSecret: process.env.LINE_CHANNEL_SECRET,
 };
 
-const client = new line.Client(config);
+const client = new messagingApi.MessagingApiClient({
+  channelAccessToken: config.channelAccessToken
+});
 
 exports.handler = async (event, context) => {
   // Only accept POST requests
@@ -72,9 +74,12 @@ async function handleEvent(event) {
       });
     }
 
-    return client.replyMessage(event.replyToken, {
-      type: 'text',
-      text: `สวัสดีครับคุณ ${user.name} ยินดีต้อนรับสู่ระบบแจ้งเตือนการบำรุงรักษารถยนต์!\nคุณสามารถพิมพ์ตัวเลขเพื่ออัปเดตเลขไมล์รถได้เลยครับ เช่น "50000"`
+    return client.replyMessage({
+      replyToken: event.replyToken,
+      messages: [{
+        type: 'text',
+        text: `สวัสดีครับคุณ ${user.name} ยินดีต้อนรับสู่ระบบแจ้งเตือนการบำรุงรักษารถยนต์!\nคุณสามารถพิมพ์ตัวเลขเพื่ออัปเดตเลขไมล์รถได้เลยครับ เช่น "50000"`
+      }]
     });
   }
 
@@ -93,9 +98,12 @@ async function handleEvent(event) {
       });
 
       if (!user || user.cars.length === 0) {
-        return client.replyMessage(event.replyToken, {
-          type: 'text',
-          text: 'ไม่พบข้อมูลรถของคุณในระบบ โปรดลองแอดบอทใหม่อีกครั้ง'
+        return client.replyMessage({
+          replyToken: event.replyToken,
+          messages: [{
+            type: 'text',
+            text: 'ไม่พบข้อมูลรถของคุณในระบบ โปรดลองแอดบอทใหม่อีกครั้ง'
+          }]
         });
       }
 
@@ -103,9 +111,12 @@ async function handleEvent(event) {
       const car = user.cars[0];
 
       if (mileage < car.currentMileage) {
-        return client.replyMessage(event.replyToken, {
-          type: 'text',
-          text: `เลขไมล์ที่แจ้ง (${mileage}) น้อยกว่าเลขไมล์ปัจจุบันในระบบ (${car.currentMileage})\nโปรดตรวจสอบและแจ้งใหม่อีกครั้งครับ`
+        return client.replyMessage({
+          replyToken: event.replyToken,
+          messages: [{
+            type: 'text',
+            text: `เลขไมล์ที่แจ้ง (${mileage}) น้อยกว่าเลขไมล์ปัจจุบันในระบบ (${car.currentMileage})\nโปรดตรวจสอบและแจ้งใหม่อีกครั้งครับ`
+          }]
         });
       }
 
@@ -130,16 +141,22 @@ async function handleEvent(event) {
         replyText += `\n\n✅ รถของคุณยังอยู่ในระยะปกติ ยังไม่มีรายการที่ต้องบำรุงรักษาครับ`;
       }
 
-      return client.replyMessage(event.replyToken, {
-        type: 'text',
-        text: replyText
+      return client.replyMessage({
+        replyToken: event.replyToken,
+        messages: [{
+          type: 'text',
+          text: replyText
+        }]
       });
     }
 
     // Default reply if it's not a number
-    return client.replyMessage(event.replyToken, {
-      type: 'text',
-      text: 'หากต้องการอัปเดตเลขไมล์ กรุณาพิมพ์เฉพาะตัวเลขครับ เช่น 50000'
+    return client.replyMessage({
+      replyToken: event.replyToken,
+      messages: [{
+        type: 'text',
+        text: 'หากต้องการอัปเดตเลขไมล์ กรุณาพิมพ์เฉพาะตัวเลขครับ เช่น 50000'
+      }]
     });
   }
 
