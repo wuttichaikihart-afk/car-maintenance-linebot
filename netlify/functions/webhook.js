@@ -169,7 +169,7 @@ async function handleEvent(event) {
 - ลงท้ายด้วยคำแนะนำห่วงใยสั้นๆ`;
 
           const response = await ai.models.generateContent({
-            model: 'gemini-2.5-flash',
+            model: 'gemini-1.5-flash',
             contents: prompt,
           });
 
@@ -224,7 +224,7 @@ ${context}
 - ถ้าลูกค้าคุยเล่น ก็คุยเล่นตอบได้เลยในฐานะช่าง`;
 
         const response = await ai.models.generateContent({
-          model: 'gemini-2.5-flash',
+          model: 'gemini-1.5-flash',
           contents: prompt,
         });
 
