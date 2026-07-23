@@ -92,17 +92,39 @@ async function handleEvent(event) {
     if (mileageMatch) {
       const mileage = parseInt(text.replace(/,/g, ''), 10);
       
-      const user = await db.user.findUnique({
+      let user = await db.user.findUnique({
         where: { lineId: userId },
         include: { cars: true }
       });
+
+      // Auto-register if the user was missed during the 'follow' event
+      if (!user) {
+        try {
+          const profile = await client.getProfile(userId);
+          user = await db.user.create({
+            data: {
+              lineId: userId,
+              name: profile.displayName,
+              cars: {
+                create: {
+                  licensePlate: 'รถของคุณ',
+                  currentMileage: 0
+                }
+              }
+            },
+            include: { cars: true }
+          });
+        } catch (e) {
+          console.error('Failed to auto-register user:', e);
+        }
+      }
 
       if (!user || user.cars.length === 0) {
         return client.replyMessage({
           replyToken: event.replyToken,
           messages: [{
             type: 'text',
-            text: 'ไม่พบข้อมูลรถของคุณในระบบ โปรดลองแอดบอทใหม่อีกครั้ง'
+            text: 'ระบบกำลังมีปัญหาในการสร้างข้อมูล โปรดลองใหม่อีกครั้งในภายหลังครับ'
           }]
         });
       }
