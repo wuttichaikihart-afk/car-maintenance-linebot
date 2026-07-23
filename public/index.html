@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ลงทะเบียนรถยนต์ - Car Maintenance Bot</title>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <!-- LINE LIFF SDK -->
+    <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+</head>
+<body>
+    <div class="background-blobs">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+    </div>
+    
+    <div class="container" id="app-container" style="display: none;">
+        <header class="header">
+            <div class="profile-pic" id="profile-pic"></div>
+            <h1>สวัสดีคุณ <span id="user-name">...</span></h1>
+            <p>กรุณาลงทะเบียนข้อมูลรถของคุณเพื่อเริ่มต้นใช้งานระบบแจ้งเตือนอัจฉริยะ</p>
+        </header>
+
+        <form id="registration-form" class="glass-card">
+            <div class="form-group">
+                <label for="brand">ยี่ห้อรถยนต์ (Brand)</label>
+                <select id="brand" name="brand" required>
+                    <option value="" disabled selected>เลือกยี่ห้อรถยนต์</option>
+                    <!-- Populated by JS -->
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="model">รุ่นรถยนต์ (Model)</label>
+                <select id="model" name="model" required disabled>
+                    <option value="" disabled selected>เลือกรุ่นรถยนต์ (กรุณาเลือกยี่ห้อก่อน)</option>
+                    <!-- Populated by JS -->
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="licensePlate">ป้ายทะเบียนรถ (License Plate)</label>
+                <input type="text" id="licensePlate" name="licensePlate" placeholder="เช่น กข 1234 กทม." required>
+            </div>
+
+            <div class="form-group">
+                <label for="currentMileage">เลขไมล์ปัจจุบัน (กม.)</label>
+                <input type="number" id="currentMileage" name="currentMileage" placeholder="เช่น 50000" min="0" required>
+            </div>
+
+            <button type="submit" class="submit-btn" id="submit-btn">
+                <span>บันทึกข้อมูลและเริ่มใช้งาน</span>
+                <div class="spinner" id="btn-spinner"></div>
+            </button>
+        </form>
+    </div>
+
+    <div class="loading-screen" id="loading-screen">
+        <div class="loader"></div>
+        <p>กำลังเตรียมพร้อม...</p>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

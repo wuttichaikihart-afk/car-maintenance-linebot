@@ -1,4 +1,5 @@
 [build]
+  publish = "public"
   command = "npx prisma generate"
   functions = "netlify/functions"
 

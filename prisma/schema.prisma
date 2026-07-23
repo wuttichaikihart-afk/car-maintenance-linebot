@@ -19,6 +19,8 @@ model Car {
   userId         String
   user           User                 @relation(fields: [userId], references: [id])
   licensePlate   String
+  brand          String?
+  model          String?
   currentMileage Int                  @default(0)
   createdAt      DateTime             @default(now())
   records        MaintenanceRecord[]

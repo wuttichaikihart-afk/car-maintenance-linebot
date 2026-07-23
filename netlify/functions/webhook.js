@@ -148,19 +148,45 @@ async function handleEvent(event) {
         data: { currentMileage: mileage }
       });
 
-      // Check for maintenance rules
-      const alerts = await checkMaintenanceRules(car.id, mileage);
-      
+      // Setup Gemini AI
       let replyText = `อัปเดตเลขไมล์เป็น ${mileage.toLocaleString()} กม. เรียบร้อยแล้วครับ`;
 
-      if (alerts.length > 0) {
-        replyText += `\n\n⚠️ **แจ้งเตือนการบำรุงรักษา:**`;
-        alerts.forEach(alert => {
-          replyText += `\n- ${alert.item} (เกินระยะมาแล้ว ${alert.overdue.toLocaleString()} กม.)`;
-        });
-        replyText += `\n\nอย่าลืมนำรถเข้าศูนย์เพื่อเช็คสภาพนะครับ!`;
+      if (process.env.GEMINI_API_KEY && car.brand && car.model) {
+        try {
+          const { GoogleGenAI } = require('@google/genai');
+          const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+          
+          const prompt = `ทำหน้าที่เป็นช่างซ่อมรถยนต์ผู้เชี่ยวชาญและใจดี ตอบกลับสั้นๆ กระชับ
+ข้อมูลรถ: ${car.brand} ${car.model}
+เลขไมล์ปัจจุบัน: ${mileage} กม.
+
+คำถาม: ตามมาตรฐานคู่มือการบำรุงรักษารถรุ่นนี้ ที่ระยะทางประมาณนี้ มีรายการอะไหล่หรือของเหลวอะไรบ้างที่ควรตรวจเช็คหรือเปลี่ยน? 
+ข้อกำหนด: 
+- ตอบเป็นข้อๆ สั้นๆ อ่านง่าย (เหมาะสำหรับแอปแชท LINE)
+- ไม่ต้องอารัมภบทเยอะ
+- ถ้าเลขไมล์น้อยมาก (เช่น เพิ่งออกรถ) ให้บอกว่ายังไม่ต้องทำอะไร แค่เช็คลมยาง/น้ำมันเครื่องพื้นฐาน
+- ถ้ามีอะไรสำคัญให้เน้นย้ำ
+- ลงท้ายด้วยคำแนะนำห่วงใยสั้นๆ`;
+
+          const response = await ai.models.generateContent({
+            model: 'gemini-2.5-flash',
+            contents: prompt,
+          });
+
+          const aiAdvice = response.text;
+          replyText += `\n\n🤖 **คำแนะนำจากช่าง AI:**\n${aiAdvice}`;
+
+        } catch (e) {
+          console.error('Failed to get Gemini response:', e);
+          replyText += `\n\n(AI กำลังพักผ่อนอยู่ตอนนี้ โปรดเช็ครายการบำรุงรักษาจากคู่มือรถของคุณนะครับ)`;
+        }
       } else {
-        replyText += `\n\n✅ รถของคุณยังอยู่ในระยะปกติ ยังไม่มีรายการที่ต้องบำรุงรักษาครับ`;
+        // Fallback or missing data
+        if (!car.brand || !car.model) {
+          replyText += `\n\n💡 บอทยังไม่ทราบยี่ห้อและรุ่นรถของคุณ เลยยังให้คำแนะนำที่แม่นยำไม่ได้ครับ ลองลงทะเบียนข้อมูลรถของคุณผ่านเมนูด้านล่างดูนะครับ!`;
+        } else {
+          replyText += `\n\n(กำลังรอการตั้งค่าระบบ AI แจ้งเตือนอัจฉริยะ)`;
+        }
       }
 
       return client.replyMessage({
