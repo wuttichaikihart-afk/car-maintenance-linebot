@@ -18,7 +18,7 @@ exports.handler = async (event, context) => {
 
   // Verify LINE signature
   const signature = event.headers['x-line-signature'];
-  const body = event.body;
+  const body = event.isBase64Encoded ? Buffer.from(event.body, 'base64').toString('utf8') : event.body;
   
   const hash = crypto
     .createHmac('SHA256', config.channelSecret)
@@ -26,10 +26,17 @@ exports.handler = async (event, context) => {
     .digest('base64');
 
   if (hash !== signature) {
+    console.error('Signature verification failed');
     return { statusCode: 401, body: 'Signature verification failed' };
   }
 
-  const data = JSON.parse(body);
+  let data;
+  try {
+    data = JSON.parse(body);
+  } catch (e) {
+    console.error('Failed to parse JSON body:', e);
+    return { statusCode: 400, body: 'Bad Request' };
+  }
 
   try {
     // Process all events
