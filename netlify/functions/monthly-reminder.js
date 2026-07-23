@@ -11,7 +11,7 @@ const client = new line.Client(config);
 
 // Run on the 1st of every month at 9:00 AM (UTC+7 usually means we set UTC time, but Netlify uses UTC by default, so 02:00 UTC = 09:00 BKK)
 // Cron syntax: minute hour day month day-of-week
-const handler = schedule('0 2 1 * *', async (event) => {
+module.exports.handler = schedule('0 2 1 * *', async (event) => {
   try {
     // Get all users
     const users = await db.user.findMany();
@@ -41,5 +41,3 @@ const handler = schedule('0 2 1 * *', async (event) => {
     };
   }
 });
-
-exports.handler = handler;
