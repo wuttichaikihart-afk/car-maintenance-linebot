@@ -20,8 +20,8 @@ exports.handler = async (event) => {
     const data = JSON.parse(event.body);
     const { lineId, brand, model, licensePlate, currentMileage } = data;
 
-    if (!lineId || !brand || !model || !licensePlate || currentMileage === undefined) {
-        return { statusCode: 400, body: 'Missing required fields' };
+    if (!lineId || lineId === 'UNKNOWN' || !brand || !model || !licensePlate || currentMileage === undefined) {
+        return { statusCode: 400, body: JSON.stringify({ success: false, error: 'ระบบไม่สามารถดึงข้อมูลบัญชี LINE ของคุณได้ กรุณาเปิดลิงก์นี้จากในแอป LINE' }) };
     }
 
     // Upsert User and Car
@@ -92,6 +92,10 @@ exports.handler = async (event) => {
       });
     } catch (e) {
       console.error('Failed to send LINE push message', e);
+      return {
+        statusCode: 200,
+        body: JSON.stringify({ success: false, error: 'บันทึกสำเร็จ แต่บอทไม่สามารถทักแชทกลับได้ กรุณาตรวจสอบว่าคุณบล็อกบอทอยู่หรือไม่' })
+      };
     }
 
     return {
