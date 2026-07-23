@@ -94,7 +94,7 @@ exports.handler = async (event) => {
       console.error('Failed to send LINE push message', e);
       return {
         statusCode: 200,
-        body: JSON.stringify({ success: false, error: 'บันทึกสำเร็จ แต่บอทไม่สามารถทักแชทกลับได้ กรุณาตรวจสอบว่าคุณบล็อกบอทอยู่หรือไม่' })
+        body: JSON.stringify({ success: false, error: 'บันทึกสำเร็จ แต่ไม่สามารถส่งข้อความยืนยันได้ (LINE Error: ' + e.message + ')' })
       };
     }
 
