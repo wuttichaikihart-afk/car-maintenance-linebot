@@ -2,6 +2,7 @@ const { messagingApi } = require('@line/bot-sdk');
 const crypto = require('crypto');
 const db = require('../../src/services/db');
 const { checkMaintenanceRules } = require('../../src/services/maintenance');
+const { GoogleGenAI } = require('@google/genai');
 
 const config = {
   channelAccessToken: process.env.LINE_CHANNEL_ACCESS_TOKEN,
@@ -153,7 +154,6 @@ async function handleEvent(event) {
 
       if (process.env.GEMINI_API_KEY && car.brand && car.model) {
         try {
-          const { GoogleGenAI } = require('@google/genai');
           const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
           
           const prompt = `ทำหน้าที่เป็นช่างซ่อมรถยนต์ผู้เชี่ยวชาญและใจดี ตอบกลับสั้นๆ กระชับ
@@ -207,7 +207,6 @@ async function handleEvent(event) {
       const car = user && user.cars.length > 0 ? user.cars[0] : null;
 
       if (process.env.GEMINI_API_KEY) {
-        const { GoogleGenAI } = require('@google/genai');
         const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
         
         let context = "";
