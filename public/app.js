@@ -125,7 +125,12 @@ document.getElementById('registration-form').addEventListener('submit', async (e
         });
 
         if (!response.ok) {
-            throw new Error('Network response was not ok');
+            let errorMsg = 'Network response was not ok';
+            try {
+                const errData = await response.json();
+                if (errData.error) errorMsg = errData.error;
+            } catch(e) {}
+            throw new Error(errorMsg);
         }
 
         const result = await response.json();
@@ -144,7 +149,7 @@ document.getElementById('registration-form').addEventListener('submit', async (e
 
     } catch (error) {
         console.error('Registration failed:', error);
-        alert('เกิดข้อผิดพลาดในการลงทะเบียน โปรดลองใหม่อีกครั้ง');
+        alert('เกิดข้อผิดพลาด: ' + (error.message || 'โปรดลองใหม่อีกครั้ง'));
     } finally {
         submitBtn.classList.remove('loading');
         submitBtn.disabled = false;
