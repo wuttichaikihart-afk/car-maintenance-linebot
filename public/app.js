@@ -13,8 +13,7 @@ const carDatabase = {
 };
 
 // LIFF ID will be injected or set manually
-// For local testing, we skip LIFF init if not provided
-const LIFF_ID = "2010818295-Ub5s1JY8"; // Inserted user's LIFF ID
+const LIFF_ID = "2010821937-6l2fCMN5"; // Inserted user's NEW LIFF ID
 
 document.addEventListener("DOMContentLoaded", () => {
     const brandSelect = document.getElementById("brand");
