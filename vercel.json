@@ -1,5 +1,6 @@
 {
   "version": 2,
+  "outputDirectory": "public",
   "rewrites": [
     {
       "source": "/.netlify/functions/webhook",
@@ -8,10 +9,6 @@
     {
       "source": "/.netlify/functions/api-register",
       "destination": "/api/index.js"
-    },
-    {
-      "source": "/(.*)",
-      "destination": "/public/$1"
     }
   ]
 }
