@@ -1,6 +1,15 @@
 {
   "version": 2,
-  "outputDirectory": "public",
+  "builds": [
+    {
+      "src": "api/index.js",
+      "use": "@vercel/node"
+    },
+    {
+      "src": "public/**/*",
+      "use": "@vercel/static"
+    }
+  ],
   "rewrites": [
     {
       "source": "/.netlify/functions/webhook",
@@ -9,6 +18,10 @@
     {
       "source": "/.netlify/functions/api-register",
       "destination": "/api/index.js"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/public/$1"
     }
   ]
 }
