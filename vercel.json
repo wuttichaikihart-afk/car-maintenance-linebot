@@ -1,0 +1,17 @@
+{
+  "version": 2,
+  "rewrites": [
+    {
+      "source": "/.netlify/functions/webhook",
+      "destination": "/api/index.js"
+    },
+    {
+      "source": "/.netlify/functions/api-register",
+      "destination": "/api/index.js"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/public/$1"
+    }
+  ]
+}
